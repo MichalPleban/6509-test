@@ -1,7 +1,7 @@
 
 OBJECT 	= obj/test.o obj/io_kernal.o obj/load.o
 BINARY 	= bin/test.prg
-TESTS 	= obj/bank_access_simple.o obj/bank_access_overflow.o obj/bank_access_other.o obj/bank_execute.o obj/read_back.o
+TESTS 	= obj/bank_access_simple.o obj/bank_access_overflow.o obj/bank_access_other.o obj/bank_execute.o obj/read_back_direct_1.o obj/read_back_direct_2.o obj/read_back_indirect_1.o obj/read_back_indirect_2.o
 
 all: 	$(OBJECT) $(TESTS) $(BINARY)
 

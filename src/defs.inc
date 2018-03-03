@@ -2,4 +2,6 @@
 BANK_ACCESS	    = 1
 BANK_EXECUTE 	= 0
 
-ZP_DATA		    = $F0
+TEST_VECTOR	    = $F0
+TEST_ADDR       = $F2
+

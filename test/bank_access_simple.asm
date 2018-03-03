@@ -18,20 +18,23 @@
 
 bank_access_simple:
             jmp @do_test
+@expected:
+            .byte $55
+@banner:
             .byte "bank access simple", 0
 
 @do_test:   
             lda #$01
             sta BANK_ACCESS
             lda #$00
-            sta ZP_DATA
+            sta TEST_VECTOR
             lda #$01
-            sta ZP_DATA+1
+            sta TEST_VECTOR+1
             ldy #$00
             lda #$55
-            sta (ZP_DATA),y
+            sta (TEST_VECTOR),y
             lda #$AA
             sta $0100
-            lda (ZP_DATA),y
-            cmp #$55
+            lda (TEST_VECTOR),y
+            cmp  @expected
             rts

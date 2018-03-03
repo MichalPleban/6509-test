@@ -15,7 +15,10 @@
 .import     bank_access_overflow
 .import     bank_access_other
 .import     bank_execute
-.import     read_back
+.import     read_back_direct_1
+.import     read_back_direct_2
+.import     read_back_indirect_1
+.import     read_back_indirect_2
 
 ; --------------------------------------------------------------------------
 ;
@@ -51,11 +54,11 @@ do_tests:
 do_one_test:
             lda the_tests+1,x
             beq @exit
-            sta ZP_DATA+3
+            sta TEST_ADDR+1
             lda the_tests,x
-            sta ZP_DATA+2
+            sta TEST_ADDR
             clc
-            adc #3
+            adc #4
             tay
             lda #$00
             adc the_tests+1,x
@@ -80,10 +83,19 @@ do_one_test:
 @notok:
             cpy #$5A
             beq @skip
+            pha
             ldy #<msg_notok
             lda #>msg_notok
             jsr output_text
-            beq @next
+            pla
+            jsr output_hex
+            ldy #<msg_expected
+            lda #>msg_expected
+            jsr output_text
+            ldy #$03
+            lda (TEST_ADDR),y
+            jsr output_hex
+            jmp @next
 @skip:
             ldy #<msg_skip
             lda #>msg_skip
@@ -96,11 +108,16 @@ do_one_test:
             rts
 
 jump_to_test:
-            jmp (ZP_DATA+2)
+            jmp (TEST_ADDR)
 
-msg_ok:     .byte "OK", 0
-msg_notok:  .byte "FAILED", 0
-msg_skip:   .byte "skipped", 0
+msg_ok:     
+            .byte "OK", 0
+msg_notok:  
+            .byte "FAILED: got ", 0
+msg_skip:   
+            .byte "skipped", 0
+msg_expected:
+            .byte ", expected ", 0
 
 ; --------------------------------------------------------------------------
 ; List of tests to be executed.
@@ -111,7 +128,10 @@ the_tests:
             .word bank_access_overflow
             .word bank_access_other
             .word bank_execute
-            .word read_back
+            .word read_back_direct_1
+            .word read_back_direct_2
+            .word read_back_indirect_1
+            .word read_back_indirect_2
             .word 0
 
 ; --------------------------------------------------------------------------
@@ -131,19 +151,42 @@ output_banner:
 ; --------------------------------------------------------------------------
             
 output_text:
-            sty ZP_DATA
-            sta ZP_DATA+1
+            sty TEST_VECTOR
+            sta TEST_VECTOR+1
             lda #$0F
             sta BANK_ACCESS
             ldy #0
 @loop:
-            lda (ZP_DATA),y
+            lda (TEST_VECTOR),y
             beq @exit
             jsr output_char
             iny
             bne @loop
 @exit:
             rts
+            
+; --------------------------------------------------------------------------
+; Display a hex string
+; --------------------------------------------------------------------------
+
+output_hex:
+            pha
+            lsr
+            lsr
+            lsr
+            lsr
+            tay
+            lda hex_chars, y
+            jsr output_char
+            pla
+            and #$0F
+            tay
+            lda hex_chars, y
+            jsr output_char
+            rts
+
+hex_chars:
+            .byte "0123456789ABCDEF";
             
 ; --------------------------------------------------------------------------
 ; Greeting banner.

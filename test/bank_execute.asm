@@ -19,26 +19,29 @@
 
 bank_execute:
             jmp @do_test
+@expected:
+            .byte $55
+@banner:
             .byte "bank execute", 0
 
 @do_test:   
             lda #$01
             sta BANK_ACCESS
             lda #$00
-            sta ZP_DATA
+            sta TEST_VECTOR
             lda #$01
-            sta ZP_DATA+1
+            sta TEST_VECTOR+1
             ldy #@payload_end-@payload
 @loop:
             lda @payload,y
-            sta (ZP_DATA),y
+            sta (TEST_VECTOR),y
             sta $0100,y
             dey
             bpl @loop
             lda #$AA
             sta @payload_diff+1
             jsr $0100
-            cmp #$55
+            cmp @expected
             rts
 
 @payload:
@@ -47,7 +50,7 @@ bank_execute:
             sty BANK_EXECUTE
 @payload_diff:
             lda #$55
-            ldy #$0F
+            ldy #$FF
             sty BANK_EXECUTE
             rts
             .reloc
